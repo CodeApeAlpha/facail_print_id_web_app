@@ -1,9 +1,16 @@
 
 import { useEffect, useState } from "react";
-// import * as faceapi from 'face-api.js';
 const Capture = () => {
-   
-    function startup() {
+    let width = 320;
+    let height = 0;
+    let streaming = false;
+    let video = null;
+    let canvas = null;
+    let photo = null;
+    const [captureCount,setCaptureCount]=useState(0);
+
+
+    const startup=()=> {
         if (showViewLiveResultButton()) { return; }
         photo = document.getElementById('photo');
         video = document.getElementById('video');
@@ -18,8 +25,10 @@ const Capture = () => {
             .catch(function (err) {
                 console.log("An error occurred: " + err);
             });
-       
-        video.addEventListener('canplay', function (ev) {
+        clearphoto();
+    }
+    const canPlay=()=>{
+        // video.addEventListener('canplay', function (ev) {
             if (!streaming) {
                 height = video.videoHeight / (video.videoWidth / width);
 
@@ -36,25 +45,12 @@ const Capture = () => {
                 canvas.setAttribute('height', height);
                 streaming = true;
             }
-        }, false);
-
-        clearphoto();
+        // }, false);
     }
-   
+    const takepicture=()=> {
 
-    let width = 320;
-    let height = 0;
-    let streaming = false;
-    let video = null;
-    let canvas = null;
-    let photo = null;
-    const [displayed, setDisplayed] = useState("none");
-
-
-    function takepicture() {
         let context = canvas.getContext('2d');
         if (width && height) {
-
             canvas.width = width;
             canvas.height = height;
             context.drawImage(video, 0, 0, width, height);
@@ -64,7 +60,7 @@ const Capture = () => {
             clearphoto();
         }
     }
-    function clearphoto() {
+    const clearphoto=()=> {
         let context = canvas.getContext('2d');
         context.fillStyle = "#AAA";
         context.fillRect(0, 0, canvas.width, canvas.height);
@@ -72,7 +68,7 @@ const Capture = () => {
         let data = canvas.toDataURL('image/png');
         photo.setAttribute('src', data);
     }
-    function showViewLiveResultButton() {
+    const showViewLiveResultButton=()=> {
         if (window.self !== window.top) {
             // Ensure that if our document is in a frame, we get the user
             // to first open it in its own tab or window. Otherwise, it
@@ -86,29 +82,35 @@ const Capture = () => {
         }
         return false;
     }
-
-   
+    const submitImage=()=>{
+       let data= photo.getAttribute("src");
+       console.log(data);
+    }
     useEffect(()=>{
-
         startup();
     });
-
     return (
         <div className="Container d-flex justify-content-center p-3 bg-secondary row">
-            <div className=" card col-6" style={{ width: "18rem" }} >
-                <video className=" card-img-top" id="video">Video stream not available.</video>
-                <canvas id="canvas" style={{ display: "none" }}></canvas>
-                <div className="output">
+            <div className=" card col-12" style={{ width: "20rem" }} >
+                <div className="row">
+                    <video className=" card-img-top" id="video" onCanPlay={canPlay}  >Video stream not available.</video>
                     <img id="photo" className="card-img-top " alt="The screen capture will appear in this box." />
                 </div>
                 <div className="card-body ">
                     <h5 className="card-title">Preview</h5>
                     <p className="card-text">This window is used to capture image for storage as refernece for the recongizition process</p>
-                    <button id="startbutton" type="button" className="btn btn-sm btn-primary col-6 " onClick={takepicture} >Capture</button>
+                    <div className="row">
+                        <div className="col-6">
+                            <button id="startbutton" type="button" className="btn btn-sm btn-primary w-100" onClick={takepicture} >Capture-{captureCount}</button>
+                        </div>
+                        <div className="col-6">
+                            <button id="startbutton" type="button" className="btn btn-sm btn-success w-100" onClick={submitImage} >Submit</button>
+                        </div>
+                    </div>
+                    <canvas id="canvas" style={{ display: "none" }}></canvas>
                 </div>
             </div>
         </div>
     );
 }
-
 export default Capture;
