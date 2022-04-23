@@ -1,11 +1,15 @@
 
 import { useEffect, useState, useRef } from "react";
 import * as faceapi from 'face-api.js';
+import useDetection from "../customHook/useDetection ";
 
 
 
 const Capture = () => {
 
+
+
+    // useDetection()
 
     const [modelsLoaded, setModelsLoaded] = useState(false);
     const [captureVideo, setCaptureVideo] = useState(false);
@@ -29,8 +33,15 @@ const Capture = () => {
                 faceapi.nets.faceExpressionNet.loadFromUri('/models')
             ]).then(() => { setModelsLoaded(true); });
         }
-        loadModles().then(()=>{
+        loadModles().then(async()=>{
 
+            const image= await faceapi.fetchImage("https://raw.githubusercontent.com/WebDevSimplified/Face-Recognition-JavaScript/master/labeled_images/Black Widow/2.jpg");
+
+            // await faceapi.bufferToImage(imageRef);
+            // // Detect all faces from buffered image
+            const detections =await faceapi.detectAllFaces(image).withFaceLandmarks().withFaceDescriptors();
+            console.log(detections);
+        
         });
     }
     , []);
@@ -105,6 +116,9 @@ const Capture = () => {
         video=document.getElementById("video")
         photo = document.getElementById('photo');
         let context = canvas.getContext('2d');
+
+
+
         if (width && height) {
             canvas.width = width;
             canvas.height = height;
@@ -112,6 +126,7 @@ const Capture = () => {
             context.drawImage(video, 0, 0, width, height);
             let data = canvas.toDataURL('image/png');
             photo.setAttribute('src', data);
+
         } else {
             clearphoto();
         }
